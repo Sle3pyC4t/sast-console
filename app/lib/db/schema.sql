@@ -84,18 +84,30 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updating timestamps
-CREATE TRIGGER update_agents_timestamp
-BEFORE UPDATE ON agents
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
+-- 检查触发器是否已存在，如果不存在则创建
+DO $$ 
+BEGIN
+  -- 检查agents表的触发器
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_agents_timestamp') THEN
+    CREATE TRIGGER update_agents_timestamp
+    BEFORE UPDATE ON agents
+    FOR EACH ROW
+    EXECUTE FUNCTION update_timestamp();
+  END IF;
 
-CREATE TRIGGER update_tasks_timestamp
-BEFORE UPDATE ON tasks
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
+  -- 检查tasks表的触发器
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_tasks_timestamp') THEN
+    CREATE TRIGGER update_tasks_timestamp
+    BEFORE UPDATE ON tasks
+    FOR EACH ROW
+    EXECUTE FUNCTION update_timestamp();
+  END IF;
 
-CREATE TRIGGER update_users_timestamp
-BEFORE UPDATE ON users
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp(); 
+  -- 检查users表的触发器
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_users_timestamp') THEN
+    CREATE TRIGGER update_users_timestamp
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_timestamp();
+  END IF;
+END $$; 

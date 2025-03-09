@@ -27,6 +27,13 @@ async function initDatabase() {
   } catch (error) {
     console.error('Database initialization error:', error);
     
+    // 特殊处理触发器已存在的错误
+    if (error.message && error.message.includes('trigger') && error.message.includes('already exists')) {
+      console.log('Ignoring trigger already exists error, this is expected during redeployment.');
+      // 不将触发器已存在视为致命错误
+      return;
+    }
+    
     // 在生产环境，如果是与特定表不存在相关的错误，我们应该失败的明确一些
     if (process.env.NODE_ENV === 'production' && 
         error.message && error.message.includes('relation') && error.message.includes('does not exist')) {
