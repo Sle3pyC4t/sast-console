@@ -94,6 +94,37 @@ export async function updateAgentStatus(id: string, status: string) {
 
 export async function deleteAgent(id: string) {
   try {
+    // 首先获取与该代理相关的所有任务ID
+    const tasksResult = await sql`
+      SELECT id FROM tasks
+      WHERE agent_id = ${id}
+    `;
+    
+    const taskIds = tasksResult.rows.map(row => row.id);
+    
+    // 删除这些任务相关的所有漏洞数据
+    if (taskIds.length > 0) {
+      for (const taskId of taskIds) {
+        await sql`
+          DELETE FROM vulnerabilities
+          WHERE task_id = ${taskId}
+        `;
+      }
+    }
+    
+    // 删除代理相关的所有扫描结果
+    await sql`
+      DELETE FROM scan_results
+      WHERE agent_id = ${id}
+    `;
+    
+    // 删除代理相关的所有任务
+    await sql`
+      DELETE FROM tasks
+      WHERE agent_id = ${id}
+    `;
+    
+    // 最后删除代理本身
     await sql`
       DELETE FROM agents
       WHERE id = ${id}
@@ -225,6 +256,19 @@ export async function updateTaskStatus(id: string, status: string) {
 
 export async function deleteTask(id: string) {
   try {
+    // 删除相关的漏洞数据
+    await sql`
+      DELETE FROM vulnerabilities
+      WHERE task_id = ${id}
+    `;
+    
+    // 删除相关的扫描结果
+    await sql`
+      DELETE FROM scan_results
+      WHERE task_id = ${id}
+    `;
+    
+    // 然后删除任务本身
     await sql`
       DELETE FROM tasks
       WHERE id = ${id}
