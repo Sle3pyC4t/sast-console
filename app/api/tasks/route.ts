@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       agent_id: json.agent_id,
       repository_url: json.repository_url,
       branch: json.branch || null,
-      scanners: json.scanners || ['bandit', 'semgrep'],
+      scanners: json.scanners || ['gitleaks', 'codeql'],
       status: 'pending',
       created_by: json.created_by || null
     };

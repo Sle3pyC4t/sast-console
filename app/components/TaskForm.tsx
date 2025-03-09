@@ -13,7 +13,7 @@ export default function TaskForm({ agents }: { agents: AgentData[] }) {
     agent_id: agents.length > 0 ? agents[0].id : '',
     repository_url: '',
     branch: '',
-    scanners: ['bandit', 'semgrep']
+    scanners: ['gitleaks', 'codeql']
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,28 +129,28 @@ export default function TaskForm({ agents }: { agents: AgentData[] }) {
           <div className="mt-2 space-y-2">
             <div className="flex items-center">
               <input
-                id="bandit"
+                id="gitleaks"
                 name="scanners"
                 type="checkbox"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                checked={formData.scanners.includes('bandit')}
-                onChange={() => handleScannerChange('bandit')}
+                checked={formData.scanners.includes('gitleaks')}
+                onChange={() => handleScannerChange('gitleaks')}
               />
-              <label htmlFor="bandit" className="ml-3 text-sm text-gray-700">
-                Bandit (Python)
+              <label htmlFor="gitleaks" className="ml-3 text-sm text-gray-700">
+                GitLeaks (Secrets Scanning)
               </label>
             </div>
             <div className="flex items-center">
               <input
-                id="semgrep"
+                id="codeql"
                 name="scanners"
                 type="checkbox"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                checked={formData.scanners.includes('semgrep')}
-                onChange={() => handleScannerChange('semgrep')}
+                checked={formData.scanners.includes('codeql')}
+                onChange={() => handleScannerChange('codeql')}
               />
-              <label htmlFor="semgrep" className="ml-3 text-sm text-gray-700">
-                Semgrep (Multi-language)
+              <label htmlFor="codeql" className="ml-3 text-sm text-gray-700">
+                CodeQL (Multiple Languages)
               </label>
             </div>
           </div>
