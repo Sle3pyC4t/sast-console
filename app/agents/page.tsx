@@ -1,9 +1,15 @@
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 import { getAgents } from '@/app/lib/db';
 import { ServerIcon, SignalIcon, SignalSlashIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 
-export default async function AgentsPage() {
+export default async function AgentsPage({ searchParams }: { searchParams?: { t?: string } }) {
+  const timestamp = new Date().getTime();
+  
   const agents = await getAgents();
   const onlineAgents = agents.filter(agent => agent.status === 'online');
   

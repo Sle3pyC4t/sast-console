@@ -1,3 +1,8 @@
+// 添加这些导出声明，确保路由是动态的并且不会被缓存
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 import { NextResponse } from 'next/server';
 import { updateAgentStatus } from '@/app/lib/db';
 
@@ -28,9 +33,16 @@ export async function POST(
       );
     }
     
+    // 返回数据时添加禁用缓存的响应头
     return NextResponse.json({ 
       success: true,
       message: 'Heartbeat received'
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
   } catch (error) {
     console.error('Error processing heartbeat:', error);
