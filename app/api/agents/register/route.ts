@@ -5,44 +5,41 @@ export const revalidate = 0;
 
 import { NextResponse } from 'next/server';
 import { createAgent } from '@/app/lib/db';
-import { AgentData } from '@/app/lib/definitions';
+import { v4 as uuidv4 } from 'uuid';
 
+// POST new agent registration
 export async function POST(request: Request) {
   try {
     const json = await request.json();
     
-    // Validate the request body
-    if (!json.agent_id || !json.agent_name) {
+    // Validate required fields
+    if (!json.name) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
     
-    // Prepare agent data
-    const agentData: Omit<AgentData, 'created_at' | 'updated_at'> = {
-      id: json.agent_id,
-      name: json.agent_name,
-      status: 'online',
+    // Generate agent ID if not provided
+    const agentId = json.id || uuidv4();
+    
+    // Prepare agent data with defaults if values not provided
+    const agentData = {
+      id: agentId,
+      name: json.name,
+      status: json.status || 'online',
       capabilities: json.capabilities || [],
       system_info: json.system_info || {},
       last_heartbeat: new Date().toISOString()
     };
     
-    // Create or update the agent in the database
+    // Create the agent in the database
     const agent = await createAgent(agentData);
     
-    // 返回数据时添加禁用缓存的响应头
     return NextResponse.json({ 
-      success: true, 
+      success: true,
       message: 'Agent registered successfully',
       agent
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
     });
   } catch (error) {
     console.error('Error registering agent:', error);
