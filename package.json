@@ -4,9 +4,10 @@
   "description": "SAST System Console for managing security scans",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run db:init && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:init": "node ./app/lib/db/init-db.js"
   },
   "dependencies": {
     "next": "^14.1.0",

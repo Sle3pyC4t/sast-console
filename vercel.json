@@ -9,5 +9,8 @@
     "deploymentEnabled": {
       "main": true
     }
+  },
+  "env": {
+    "NODE_ENV": "production"
   }
 } 
