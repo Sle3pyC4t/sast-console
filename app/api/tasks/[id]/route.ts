@@ -1,22 +1,18 @@
+// 添加这些导出声明，确保路由是动态的并且不会被缓存
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 import { NextResponse } from 'next/server';
 import { getTask, updateTaskStatus, deleteTask } from '@/app/lib/db';
 
-// GET task by ID
+// GET specific task by ID
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const taskId = params.id;
-    
-    if (!taskId) {
-      return NextResponse.json(
-        { error: 'Task ID is required' },
-        { status: 400 }
-      );
-    }
-    
-    const task = await getTask(taskId);
+    const task = await getTask(params.id);
     
     if (!task) {
       return NextResponse.json(
@@ -25,7 +21,14 @@ export async function GET(
       );
     }
     
-    return NextResponse.json({ task });
+    // 返回数据时添加禁用缓存的响应头
+    return NextResponse.json({ task }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     console.error('Error fetching task:', error);
     return NextResponse.json(
@@ -35,7 +38,7 @@ export async function GET(
   }
 }
 
-// UPDATE task status
+// PATCH to update task status
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
@@ -44,6 +47,7 @@ export async function PATCH(
     const taskId = params.id;
     const json = await request.json();
     
+    // Validate task ID and status
     if (!taskId) {
       return NextResponse.json(
         { error: 'Task ID is required' },
@@ -58,6 +62,7 @@ export async function PATCH(
       );
     }
     
+    // Update the task status
     const task = await updateTaskStatus(taskId, json.status);
     
     if (!task) {
@@ -69,7 +74,7 @@ export async function PATCH(
     
     return NextResponse.json({ 
       success: true,
-      message: 'Task status updated',
+      message: 'Task status updated successfully',
       task
     });
   } catch (error) {
@@ -81,7 +86,7 @@ export async function PATCH(
   }
 }
 
-// DELETE task
+// DELETE task by ID
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -89,6 +94,7 @@ export async function DELETE(
   try {
     const taskId = params.id;
     
+    // 验证任务ID
     if (!taskId) {
       return NextResponse.json(
         { error: 'Task ID is required' },
@@ -96,9 +102,8 @@ export async function DELETE(
       );
     }
     
-    // Check if task exists
+    // 检查任务是否存在
     const task = await getTask(taskId);
-    
     if (!task) {
       return NextResponse.json(
         { error: 'Task not found' },
@@ -106,7 +111,15 @@ export async function DELETE(
       );
     }
     
-    await deleteTask(taskId);
+    // 删除任务
+    const success = await deleteTask(taskId);
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to delete task' },
+        { status: 500 }
+      );
+    }
     
     return NextResponse.json({ 
       success: true,
